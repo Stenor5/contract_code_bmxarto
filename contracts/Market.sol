@@ -56,8 +56,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
     function createMarketItem(
         address nftContract,
         uint256 tokenId,
-        uint256 price,
-        bool forSale
+        uint256 price
     ) public payable nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
         require(
@@ -75,15 +74,9 @@ contract NFTMarket is ReentrancyGuard, Ownable {
             payable(msg.sender),
             payable(msg.sender),
             price,
-            forSale
+            false
         );
-        if (forSale == true) {
-            IERC721(nftContract).transferFrom(
-                msg.sender,
-                address(this),
-                tokenId
-            );
-        }
+        // IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
         emit MarketItemCreated(
             itemId,
@@ -92,17 +85,17 @@ contract NFTMarket is ReentrancyGuard, Ownable {
             msg.sender,
             msg.sender,
             price,
-            forSale
+            false
         );
     }
 
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
-    function createMarketSale(
-        address nftContract,
-        uint256 itemId,
-        bool forSale
-    ) public payable nonReentrant {
+    function createMarketSale(address nftContract, uint256 itemId)
+        public
+        payable
+        nonReentrant
+    {
         uint256 price = idToMarketItem[itemId].price;
         uint256 tokenId = idToMarketItem[itemId].tokenId;
         require(
@@ -111,15 +104,8 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         );
 
         idToMarketItem[itemId].iowner.transfer(msg.value);
-        if (forSale == false) {
-            IERC721(nftContract).transferFrom(
-                address(this),
-                msg.sender,
-                tokenId
-            );
-        }
+        IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketItem[itemId].iowner = payable(msg.sender);
-        idToMarketItem[itemId].forSale = forSale;
     }
 
     /* Gets a NFT to show ItemDetail */
@@ -132,7 +118,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         return item;
     }
 
-    /* Returns market items accoding to toSell property */
+    /* Returns market items accoding to forSale property */
     function fetchMarketItems(bool isSell)
         public
         view
@@ -213,28 +199,12 @@ contract NFTMarket is ReentrancyGuard, Ownable {
     }
 
     /* Up the item on market */
-    function listForSale(
-        address nftContract,
-        uint256 id,
-        bool isSell
-    ) external {
+    function listForSale(address nftContract, uint256 id) external {
         require(id <= _itemIds.current(), "out of boundary");
         MarketItem memory item = idToMarketItem[id];
         uint256 tokenId = idToMarketItem[id].tokenId;
-        if (isSell == true) {
-            IERC721(nftContract).transferFrom(
-                msg.sender,
-                address(this),
-                tokenId
-            );
-        } else {
-            IERC721(nftContract).transferFrom(
-                address(this),
-                msg.sender,
-                tokenId
-            );
-        }
-        item.forSale = isSell;
+        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+        item.forSale = true;
         idToMarketItem[id] = item;
     }
 
