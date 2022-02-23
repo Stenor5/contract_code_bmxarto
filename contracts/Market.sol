@@ -63,30 +63,40 @@ contract NFTMarket is ReentrancyGuard, Ownable {
             msg.value == listingPrice,
             "Price must be equal to listing price"
         );
-
-        _itemIds.increment();
         uint256 itemId = _itemIds.current();
+        if (itemId >= tokenId) {
+            MarketItem memory item = idToMarketItem[tokenId];
+            item.forSale = true;
+            item.price = price;
+            idToMarketItem[tokenId] = item;
+            IERC721(nftContract).transferFrom(
+                msg.sender,
+                address(this),
+                tokenId
+            );
+        } else {
+            _itemIds.increment();
+            itemId = _itemIds.current();
+            idToMarketItem[itemId] = MarketItem(
+                itemId,
+                nftContract,
+                tokenId,
+                payable(msg.sender),
+                payable(msg.sender),
+                price,
+                true
+            );
 
-        idToMarketItem[itemId] = MarketItem(
-            itemId,
-            nftContract,
-            tokenId,
-            payable(msg.sender),
-            payable(msg.sender),
-            price,
-            false
-        );
-        // IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
-
-        emit MarketItemCreated(
-            itemId,
-            nftContract,
-            tokenId,
-            msg.sender,
-            msg.sender,
-            price,
-            false
-        );
+            emit MarketItemCreated(
+                itemId,
+                nftContract,
+                tokenId,
+                msg.sender,
+                msg.sender,
+                price,
+                true
+            );
+        }
     }
 
     /* Creates the sale of a marketplace item */
@@ -196,16 +206,6 @@ contract NFTMarket is ReentrancyGuard, Ownable {
             }
         }
         return items;
-    }
-
-    /* Up the item on market */
-    function listForSale(address nftContract, uint256 id) external {
-        require(id <= _itemIds.current(), "out of boundary");
-        MarketItem memory item = idToMarketItem[id];
-        uint256 tokenId = idToMarketItem[id].tokenId;
-        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
-        item.forSale = true;
-        idToMarketItem[id] = item;
     }
 
     /* Withdraw to the contract owner */

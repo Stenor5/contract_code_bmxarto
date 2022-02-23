@@ -5,7 +5,7 @@ require("dotenv").config();
 const fs = require('fs');
 const PRIVATE_KEY = fs.readFileSync(".secret").toString().trim() || "01234567890123456789";
 const infuraId = fs.readFileSync(".infuraid").toString().trim() || "";
-const { ETHERSCAN_API_KEY } = process.env;
+const { ETHERSCAN_API_KEY, ROPSTEN_API_KEY } = process.env;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -24,6 +24,13 @@ module.exports = {
   networks: {
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${infuraId}`,
+      accounts: [PRIVATE_KEY],
+      gas: 2100000,
+      gasPrice: 8000000000,
+      saveDeployments: true,
+    },
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${ROPSTEN_API_KEY}`,
       accounts: [PRIVATE_KEY],
       gas: 2100000,
       gasPrice: 8000000000,
