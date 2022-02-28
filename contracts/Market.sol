@@ -52,7 +52,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
     }
 
     /* Places an item for sale on the marketplace */
-    function createMarketItem(
+    function itemOnMarket(
         address nftContract,
         uint256 tokenId,
         uint256 price
@@ -104,9 +104,17 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         }
     }
 
+    /* Down the NFT of the market */
+    function itemDownMarket(address nftContract, uint256 tokenId) public {
+        MarketItem memory item = idToMarketItem[tokenId];
+        item.forSale = false;
+        idToMarketItem[tokenId] = item;
+        IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+    }
+
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
-    function createMarketSale(address nftContract, uint256 itemId)
+    function buyNft(address nftContract, uint256 itemId)
         public
         payable
         nonReentrant
@@ -121,6 +129,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         idToMarketItem[itemId].currentOwner.transfer(msg.value);
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketItem[itemId].currentOwner = payable(msg.sender);
+        idToMarketItem[itemId].forSale = false;
     }
 
     /* Gets a NFT to show ItemDetail */
