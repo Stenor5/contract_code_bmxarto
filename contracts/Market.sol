@@ -14,6 +14,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
 
     address payable currentOwner;
     uint256 listingPrice = 0.025 ether;
+    uint256 unlistingPrice = 0.015 ether;
 
     constructor() {
         currentOwner = payable(msg.sender);
@@ -49,6 +50,16 @@ contract NFTMarket is ReentrancyGuard, Ownable {
     /* Sets the listing price of the contract */
     function setListingPrice(uint256 _listingPrice) public onlyOwner {
         listingPrice = _listingPrice;
+    }
+
+    /* Returns the inlisting price of the contract */
+    function getUnlistingPrice() public view returns (uint256) {
+        return unlistingPrice;
+    }
+
+    /* Sets the unlisting price of the contract */
+    function setUnlistingPrice(uint256 _unlistingPrice) public onlyOwner {
+        unlistingPrice = _unlistingPrice;
     }
 
     /* Places an item for sale on the marketplace */
@@ -109,12 +120,13 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         MarketItem memory item = idToMarketItem[tokenId];
         item.forSale = false;
         idToMarketItem[tokenId] = item;
+        idToMarketItem[tokenId].currentOwner.transfer(unlistingPrice);
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
     }
 
     /* Creates the sale of a marketplace item */
     /* Transfers ownership of the item, as well as funds between parties */
-    function buyNft(address nftContract, uint256 itemId)
+    function transferNft(address nftContract, uint256 itemId)
         public
         payable
         nonReentrant
