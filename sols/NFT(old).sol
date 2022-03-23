@@ -12,28 +12,17 @@ contract NFT is ERC721URIStorage {
     Counters.Counter private _tokenIds;
     address contractAddress;
 
-    event minted(
-        uint256 tokenId,
-        string tokenUri,
-        address creator,
-        uint256 price
-    );
-
-    constructor() ERC721("BMXarto", "BMX") {
+    constructor(address marketplaceAddress) ERC721("BMXarto", "BMX") {
+        contractAddress = marketplaceAddress;
     }
 
-    function createToken(string memory tokenURI, uint256 price) public returns (uint) {
+    function createToken(string memory tokenURI) public returns (uint) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        emit minted (
-            newItemId,
-            tokenURI,
-            msg.sender,
-            price
-        );
+        setApprovalForAll(contractAddress, true);
         return newItemId;
     }
 }

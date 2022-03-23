@@ -19,7 +19,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
 
     constructor() {
         currentOwner = payable(msg.sender);
-        benifit = 0;
+        _benifit = 0;
     }
   /* MarketItem and AuctionItem Struct */
     struct MarketItem {
@@ -53,26 +53,28 @@ contract NFTMarket is ReentrancyGuard, Ownable {
     );
 
     event MarketItemForSaleUpdated(
-      string status
+        uint256 tokenId,
+        string status
     );
 
     event NFTPurchased(
-      address currentOwner,
-      string status
+        uint256 tokenId,
+        address currentOwner,
+        string status
     );
 
-    event BidForAuction(
-      address nftContract,
-      uint256 tokenId,
-      address bidder,
-      uint256 bidPrice
+    event BidMade(
+        address nftContract,
+        uint256 tokenId,
+        address bidder,
+        uint256 bidPrice
     );
 
     event AuctionEnded(
-      address nftContract,
-      uint256 tokenId,
-      address highestBidder,
-      uint256 highestBid
+        address nftContract,
+        uint256 tokenId,
+        address highestBidder,
+        uint256 highestBid
     );
 
   /* Set and Get various percentages*/
@@ -159,7 +161,8 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         _benifit -= (item.price * unlistingPricePercentage / 10000);
 
         emit MarketItemForSaleUpdated (
-          "down"
+            tokenId,
+            "down"
         );
     }
 
@@ -186,8 +189,9 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         idToMarketItem[tokenId].status = "down";
 
         emit NFTPurchased (
-          msg.sender,
-          "down"
+            tokenId,
+            msg.sender,
+            "down"
         );
     }
 
@@ -208,7 +212,7 @@ contract NFTMarket is ReentrancyGuard, Ownable {
         idToHighestBidder[tokenId] = payable(msg.sender);
         idToHighestBid[tokenId] = msg.value;
 
-        emit BidForAuction (
+        emit BidMade (
           nftContract,
           tokenId,
           msg.sender,
@@ -223,12 +227,15 @@ contract NFTMarket is ReentrancyGuard, Ownable {
       require(block.timestamp >= idToMarketItem[tokenId].expiresAt, "Auction not yet ended.");
       require(
         keccak256(abi.encodePacked((idToMarketItem[tokenId].status))) != keccak256(abi.encodePacked(("down"))),
-        "Auction has already ended.");
+        "Auction has already ended."
+        );
 
       // End the auction
       idToMarketItem[tokenId].status = "down";
       //Send the highest bid to the seller.
-      idToMarketItem[tokenId].currentOwner.transfer(idToHighestBid[tokenId]);
+      if (IERC721(nftContract).ownerOf(tokenId) != idToHighestBidder[tokenId]) {
+        idToMarketItem[tokenId].currentOwner.transfer(idToHighestBid[tokenId]);
+      }
       // Transfer the item to the highest bidder
       IERC721(nftContract).transferFrom(idToMarketItem[tokenId].currentOwner, idToHighestBidder[tokenId], tokenId);
       idToMarketItem[tokenId].currentOwner = idToHighestBidder[tokenId];
@@ -243,9 +250,10 @@ contract NFTMarket is ReentrancyGuard, Ownable {
 
   /* Withdraw to the contract owner */
     function withdrawSiteBenifit() public onlyOwner {
-        require(balance > 0, "No cash left to withdraw.");
+        require(_benifit > 0, "No cash left to withdraw.");
         (bool success, ) = (msg.sender).call{value: _benifit}("");
         require(success, "Transfer failed.");
+        _benifit = 0;
     }
 
   /* Gets a NFT to show ItemDetail */

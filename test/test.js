@@ -3,10 +3,9 @@ describe("NFTMarket", function () {
     const Market = await ethers.getContractFactory("NFTMarket")
     const market = await Market.deploy()
     await market.deployed()
-    const marketAddress = market.address
 
     const NFT = await ethers.getContractFactory("NFT")
-    const nft = await NFT.deploy(marketAddress)
+    const nft = await NFT.deploy()
     await nft.deployed()
     const nftContractAddress = nft.address
 
@@ -14,12 +13,14 @@ describe("NFTMarket", function () {
     listingPrice = listingPrice.toString()
 
     const auctionPrice = ethers.utils.parseUnits('1', 'ether')
+    const mintPrice = ethers.utils.parseUnits('0.5', 'ether')
 
-    await nft.createToken("https://www.mytokenlocation.com")
-    await nft.createToken("https://www.mytokenlocation2.com")
+    await nft.mintNFT("https://www.mytokenlocation.com", mintPrice)
+    await nft.mintNFT("https://www.mytokenlocation2.com", mintPrice)
 
-    await market.createMarketItem(nftContractAddress, 1, auctionPrice, { value: listingPrice })
-    await market.createMarketItem(nftContractAddress, 2, auctionPrice, { value: listingPrice })
+    await market.itemOnMarket(nftContractAddress, 1, auctionPrice, "forSale", { value: listingPrice })
+    await market.itemOnMarket(nftContractAddress, 2, auctionPrice, "forAuction", { value: listingPrice })
+    await market.itemOnMarket(nftContractAddress, 2, auctionPrice, "forAuction", { value: listingPrice })
 
     const [_, buyerAddress] = await ethers.getSigners()
 
