@@ -1,12 +1,12 @@
 {
-  "name": "polygon-next",
-  "version": "0.1.0",
+  "name": "BMXarto-Smart-Contract",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network mainnet",
+    "deploy:testnet": "npx hardhat run scripts/deploy.js --network testnet",
+    "verify:mainnet": "npx hardhat run scripts/verify.js --network mainnet",
+    "verify:testnet": "npx hardhat run scripts/verify.js --network testnet"
   },
   "dependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

@@ -19,9 +19,23 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.4",
-  defaultNetwork: "rinkeby",
+  solidity: {
+    version: "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+      },
+    },
+  },
+  defaultNetwork: "mainnet",
   networks: {
+    mainnet: {
+      url: `https://bsc-dataseed1.ninicoin.io`,
+      accounts: [PRIVATE_KEY],
+      chainId: 56,
+      saveDeployments: true,
+    },
     rinkeby: {
       url: `https://eth-rinkeby.alchemyapi.io/v2/${infuraId}`,
       accounts: [PRIVATE_KEY],
@@ -29,14 +43,7 @@ module.exports = {
       gasPrice: 8000000000,
       saveDeployments: true,
     },
-    ropsten: {
-      url: `https://eth-ropsten.alchemyapi.io/v2/${ROPSTEN_API_KEY}`,
-      accounts: [PRIVATE_KEY],
-      gas: 2100000,
-      gasPrice: 8000000000,
-      saveDeployments: true,
-    },
-    bsc_testnet: {
+    testnet: {
       url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
       accounts: [PRIVATE_KEY],
       chainId: 97,
