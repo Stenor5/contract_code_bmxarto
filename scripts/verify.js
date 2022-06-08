@@ -4,6 +4,10 @@ const address = require("../config");
 console.log(address)
 async function main() {
   await hre.run("verify:verify", {
+    address: address.nftaddress,
+    constructorArguments: []
+  })
+  await hre.run("verify:verify", {
     address: address.nftmarketaddress,
     constructorArguments: []
   })

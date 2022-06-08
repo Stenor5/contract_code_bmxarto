@@ -30,7 +30,7 @@ module.exports = {
   defaultNetwork: "mainnet",
   networks: {
     mainnet: {
-      url: `https://bsc-dataseed1.ninicoin.io`,
+      url: `https://bsc-dataseed2.binance.org/`,
       accounts: [PRIVATE_KEY],
       chainId: 56,
       saveDeployments: true,
