@@ -11,7 +11,7 @@ contract NFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    event minted(
+    event Minted(
         address nftContract,
         uint256 tokenId,
         string tokenUri,
@@ -32,7 +32,7 @@ contract NFT is ERC721URIStorage {
 
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        emit minted(
+        emit Minted(
             address(this),
             newItemId,
             tokenURI,
