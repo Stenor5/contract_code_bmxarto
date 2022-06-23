@@ -16,30 +16,21 @@ contract NFT is ERC721URIStorage {
         uint256 tokenId,
         string tokenUri,
         address creator,
-        uint256 price,
-        string category
+        uint256 price
     );
 
     constructor() ERC721("BMXarto", "BMX") {}
 
-    function mintNFT(
-        string memory tokenURI,
-        uint256 price,
-        string memory category
-    ) public returns (uint256) {
+    function mintNFT(string memory tokenURI, uint256 price)
+        public
+        returns (uint256)
+    {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
 
         _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        emit Minted(
-            address(this),
-            newItemId,
-            tokenURI,
-            msg.sender,
-            price,
-            category
-        );
+        emit Minted(address(this), newItemId, tokenURI, msg.sender, price);
         return newItemId;
     }
 }
